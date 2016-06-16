@@ -1,4 +1,4 @@
-package com.funshion;
+package com;
 
 
 import net.sf.json.JSONObject;

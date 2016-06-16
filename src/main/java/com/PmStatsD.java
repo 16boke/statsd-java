@@ -1,4 +1,4 @@
-package com.funshion;
+package com;
 
 import com.timgroup.statsd.NonBlockingStatsDClient;
 import com.timgroup.statsd.StatsDClient;

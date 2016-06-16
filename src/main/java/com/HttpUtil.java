@@ -1,4 +1,4 @@
-package com.funshion;
+package com;
 
 
 import java.io.IOException;
