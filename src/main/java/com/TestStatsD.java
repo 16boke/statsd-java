@@ -21,11 +21,7 @@ public class TestStatsD {
 		return 0;
 	}
 	public static void pm25(StatsDClient client){
-		client.gauge("airquality.beijing.pm25", PmStatsD.get_city_data("beijing"));
-		client.gauge("airquality.shanghai.pm25", PmStatsD.get_city_data("shanghai"));
-		client.gauge("airquality.guangzhou.pm25", PmStatsD.get_city_data("guangzhou"));
-		client.gauge("airquality.wuhan.pm25", PmStatsD.get_city_data("wuhan"));
-		client.gauge("airquality.xiantao.pm25", PmStatsD.get_city_data("xiantao"));
+		PmStatsD.gaugePm25(client);
 	}
 	public static void main(String[] args) {
 		try {
