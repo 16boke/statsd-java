@@ -1,17 +1,21 @@
 package com;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import net.sf.json.JSONObject;
 
 import com.timgroup.statsd.NonBlockingStatsDClient;
 import com.timgroup.statsd.StatsDClient;
 
-
 public class TestStatsD {
-	public static long getOPS(String url){
+	public static long getOPS(String url) {
 		try {
 			String res = HttpUtil.getHttp(url);
-			if(res!=null && res.trim().length()>0){
+			if (res != null && res.trim().length() > 0) {
 				JSONObject jsonObject = JSONObject.fromObject(res);
 				return jsonObject.getLong("ops");
 			}
@@ -20,33 +24,39 @@ public class TestStatsD {
 		}
 		return 0;
 	}
-	public static void pm25(StatsDClient client){
+
+	public static void pm25(StatsDClient client) {
 		PmStatsD.gaugePm25(client);
 	}
+
 	public static void main(String[] args) {
 		try {
-			final StatsDClient client = new NonBlockingStatsDClient("","192.168.48.47", 8125);
-			final String mvs_url = "http://192.168.112.42:18087/api/overview";
-			final String mvir_url = "http://192.168.112.40:18087/api/overview";
-			final String tvs_url = "http://192.168.112.47:18087/api/overview";
-			new Thread(new Runnable() {
-				public void run() {
-					while(true){
-						client.count("mvs.ops", getOPS(mvs_url));
-						client.count("mvir.ops", getOPS(mvir_url));
-						client.count("tvs.ops", getOPS(tvs_url));
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
+			final StatsDClient client = new NonBlockingStatsDClient("", "192.168.48.47", 8125);
+			final Map<String, String> map = new HashMap<String, String>();
+			map.put("mvs.ops", "http://192.168.112.42:18087/api/overview");
+			map.put("mvir.ops", "http://192.168.112.40:18087/api/overview");
+			map.put("tvs.ops", "http://192.168.112.47:18087/api/overview");
+			ExecutorService threadPool = Executors.newCachedThreadPool();
+			Set<String> keySet = map.keySet();
+			for (final String key : keySet) {
+				threadPool.execute(new Runnable() {
+					@Override
+					public void run() {
+						while (true) {
+							client.count(key, getOPS(map.get(key)));
+							try {
+								Thread.sleep(60000);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
 						}
 					}
-				}
-			}).start();
+				});
+			}
 			
-			new Thread(new Runnable() {
+			threadPool.execute(new Runnable() {
 				public void run() {
-					while(true){
+					while (true) {
 						pm25(client);
 						try {
 							Thread.sleep(60000);
@@ -55,9 +65,11 @@ public class TestStatsD {
 						}
 					}
 				}
-			}).start();
+			});
 			
-			
+			threadPool.shutdown();
+
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
