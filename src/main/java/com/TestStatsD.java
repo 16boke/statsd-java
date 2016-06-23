@@ -45,7 +45,7 @@ public class TestStatsD {
 						while (true) {
 							client.count(key, getOPS(map.get(key)));
 							try {
-								Thread.sleep(60000);
+								Thread.sleep(10000);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
