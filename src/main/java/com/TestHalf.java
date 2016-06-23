@@ -30,12 +30,32 @@ public class TestHalf {
 
 	/**
 	 * 根据ip地址判断属于哪个ip地址段，返回这个段的ip地址对象
-	 * 
+	 * 使用顺序查找来实现
 	 * @param ip
 	 * @param ipBeans
 	 * @return
 	 */
-	public static IPBean getIPIndex(String ip) {
+	public static IPBean getIP(String ip) {
+		IPBean[] ipBeans = getIpBeans();
+		if (ipBeans == null || ipBeans.length == 0)
+			return null;
+		long iplong = IPUtil.ipToLong(ip);
+		if (iplong < ipBeans[0].getBegin() || iplong > ipBeans[ipBeans.length - 1].getEnd())
+			return null;
+		for(IPBean ipBean:ipBeans){
+			if(ipBean.getBegin()<=iplong && ipBean.getEnd()>=iplong)
+				return ipBean;
+		}
+		return null;
+	}
+	/**
+	 * 根据ip地址判断属于哪个ip地址段，返回这个段的ip地址对象
+	 * 使用二分查找算法来实现
+	 * @param ip
+	 * @param ipBeans
+	 * @return
+	 */
+	public static IPBean getIPByHalf(String ip) {
 		IPBean[] ipBeans = getIpBeans();
 		if (ipBeans == null || ipBeans.length == 0)
 			return null;
@@ -57,6 +77,10 @@ public class TestHalf {
 		return null;
 	}
 
+	/**
+	 * 读取ipcode.txt文件，按行读取，并转成IPBean对象数组
+	 * @return
+	 */
 	public static IPBean[] getIpBeans() {
 		InputStreamReader inputStreamReader = null;
 		BufferedReader reader = null;
@@ -88,11 +112,10 @@ public class TestHalf {
 	public static void main(String[] args) {
 		// int num[] = { 2, 3, 4, 6, 10, 20, 31, 35, 42, 53, 60, 90 };
 		// System.out.println(getIndex(7, num));
-		IPBean ipBean = getIPIndex("20.1.1.255");
+		IPBean ipBean = getIPByHalf("20.1.1.255");
+		IPBean ipBean1 = getIP("20.1.1.255");
 		System.out.println(ipBean);
-		if (ipBean != null)
-			System.out.println("begin = " + IPUtil.longToIP(ipBean.getBegin()) + " , end = " + IPUtil.longToIP(ipBean.getEnd())
-					+ " , code = " + ipBean.getCode());
+		System.out.println(ipBean1);
 	}
 }
 
